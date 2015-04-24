@@ -17,6 +17,9 @@ class ControllerMatcher
     /** @var DependencyManager */
     protected $dependencyManager;
 
+    /**
+     * @param DependencyManager $dependencyManager
+     */
     public function __construct(DependencyManager $dependencyManager)
     {
         $this->dependencyManager = $dependencyManager;
@@ -64,7 +67,7 @@ class ControllerMatcher
             return call_user_func_array([$controller, $method], $arguments);
         });
 
-        $controllerMatch->setArguments($this->getArguments($request, $controller, $method));
+        $controllerMatch->setArguments($this->getArguments($controller, $method));
 
         return $controllerMatch;
     }
@@ -83,27 +86,24 @@ class ControllerMatcher
     }
 
     /**
-     * @param Request $request
      * @param string  $controller
      * @param string  $method
      *
      * @return array
      * @throws \Exception
      */
-    protected function getArguments(Request $request, $controller, $method)
+    protected function getArguments($controller, $method)
     {
-        $routeArgs = $request->attributes->get('route_args');
-
+        // Build a ReflectionMethod to access controller action arguments
         $reflectedMethod = new \ReflectionMethod($controller, $method);
         $params = $reflectedMethod->getParameters();
+
+        $argumentResolver = $this->dependencyManager->get('argumentResolver');
+
         $orderedArguments = [];
 
         foreach ($params as $param) {
-            if (!isset($routeArgs[$param->getName()])) {
-                throw new \Exception(sprintf('%s parameter required for method', $param->getName()));
-            }
-
-            $orderedArguments[] = $routeArgs[$param->getName()];
+            $orderedArguments = $argumentResolver->resolveArgument($orderedArguments, $param);
         }
 
         return $orderedArguments;

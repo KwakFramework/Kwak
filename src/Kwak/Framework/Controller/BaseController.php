@@ -21,12 +21,4 @@ abstract class BaseController
     {
         $this->dependencyManager = $dependencyManager;
     }
-
-    /**
-     * @return Request
-     */
-    protected function getLastRequest()
-    {
-        return $this->dependencyManager->get('requestPool')->getLastRequest();
-    }
 }

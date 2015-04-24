@@ -3,6 +3,7 @@
 namespace Kwak;
 
 use Imbrix\DependencyManager;
+use Kwak\Http\Controller\ArgumentResolver;
 use Kwak\Http\Controller\ControllerExecutor;
 use Kwak\Http\Controller\ControllerMatcher;
 use Kwak\Http\Request\RequestPool;
@@ -91,6 +92,10 @@ class Application
 
         $dependencyManager->addService('controllerMatcher', function ($dependencyManager) {
             return new ControllerMatcher($dependencyManager);
+        });
+
+        $dependencyManager->addService('argumentResolver', function ($dependencyManager) {
+            return new ArgumentResolver($dependencyManager);
         });
 
         $dependencyManager->addService('requestPool', function() {
