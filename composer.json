@@ -17,7 +17,7 @@
     ],
     "autoload": {
         "psr-0": {
-            "Kwak": "src/",
+            "Kwak": "src/"
         }
     },
     "minimum-stability": "dev"
