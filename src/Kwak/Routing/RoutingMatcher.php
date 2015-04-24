@@ -33,12 +33,10 @@ class RoutingMatcher
         $pathInfo = $request->getPathInfo();
 
         foreach ($this->routingDefinition->getRoutes() as $route) {
-
-            preg_match_all('/{([a-z0-9]*)}/i', $route->getPath(), $matches);
-
             $routePath = $this->convertPathToRegex($route->getPath());
 
             if (preg_match($routePath, $pathInfo, $routeArgs)) {
+                preg_match_all('/{([a-z0-9_]*)}/i', $route->getPath(), $matches);
 
                 $parsedRouteArgs = [];
 
@@ -65,8 +63,8 @@ class RoutingMatcher
     protected function convertPathToRegex($routePath)
     {
         $routePath = str_replace('/', '\/', $routePath);
+        $routePath = str_replace('.', '\.', $routePath);
 
-
-        return '/' . preg_replace('/{[a-z0-9]*}/i', "([a-z0-9]*)", $routePath) . '/i';
+        return '/' . preg_replace('/{[a-z0-9_]*}/i', "([a-z0-9-_]*)", $routePath) . '/i';
     }
 }
