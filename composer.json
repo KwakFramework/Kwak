@@ -1,5 +1,5 @@
 {
-    "name": "kwak/kawk",
+    "name": "kwak/kwak",
     "description": "PHP Microframework",
     "require": {
         "symfony/http-foundation": "~3.0@dev",
