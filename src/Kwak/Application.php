@@ -3,9 +3,9 @@
 namespace Kwak;
 
 use Imbrix\DependencyManager;
-
 use Kwak\Http\Controller\ControllerExecutor;
 use Kwak\Http\Controller\ControllerMatcher;
+use Kwak\Http\Request\RequestPool;
 use Kwak\Routing\RoutingDefinition;
 use Kwak\Routing\RoutingMatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +24,8 @@ class Application
     public function init()
     {
         $this->initDependencyManager();
+
+        $this->getDependencyManager()->get('requestPool')->addRequest(Request::createFromGlobals());
     }
 
     /**
@@ -33,9 +35,9 @@ class Application
     public function run()
     {
         try {
-            $request = Request::createFromGlobals();
+            $request = $this->getDependencyManager()->get('requestPool')->getLastRequest();
 
-            $request = $this->dependencyManager->get('routingMatcher')->matchRequest($request);
+            $this->dependencyManager->get('routingMatcher')->matchRequest($request);
 
             $controllerMatcher = $this->dependencyManager->get('controllerMatcher');
             $controllerMatch = $controllerMatcher->matchRoute($request);
@@ -89,6 +91,10 @@ class Application
 
         $dependencyManager->addService('controllerMatcher', function ($dependencyManager) {
             return new ControllerMatcher($dependencyManager);
+        });
+
+        $dependencyManager->addService('requestPool', function() {
+            return new RequestPool();
         });
 
         $this->dependencyManager = $dependencyManager;
