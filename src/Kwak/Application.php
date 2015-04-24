@@ -11,17 +11,23 @@ use Kwak\Routing\RoutingDefinition;
 use Kwak\Routing\RoutingMatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Class Application
  *
  * @package Kwak
  */
-class Application
+class Application implements HttpKernelInterface
 {
     /** @var DependencyManager */
     protected $dependencyManager;
 
+    /**
+     * Initiate :
+     * - DependencyManager and default dependencies
+     * - Request
+     */
     public function init()
     {
         $this->initDependencyManager();
@@ -35,9 +41,24 @@ class Application
      */
     public function run()
     {
-        try {
-            $request = $this->getDependencyManager()->get('requestPool')->getLastRequest();
+        $request = $this->getDependencyManager()->get('requestPool')->getLastRequest();
 
+        return $this->handle($request);
+    }
+
+    /**
+     * Handle Request (conform to HttpKernelInterface)
+     *
+     * @param Request $request
+     * @param int     $type
+     * @param bool    $catch
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true)
+    {
+        try {
             $this->dependencyManager->get('routingMatcher')->matchRequest($request);
 
             $controllerMatcher = $this->dependencyManager->get('controllerMatcher');
@@ -47,7 +68,11 @@ class Application
 
             return $controllerExecutor->executeCallable($controllerMatch->getControllerCallable(), $controllerMatch->getArguments());
         } catch (\Exception $e) {
-            return $this->handleException($e);
+            if ($catch) {
+                return $this->handleException($e);
+            } else {
+                throw $e;
+            }
         }
     }
 
