@@ -35,16 +35,16 @@ class Application
         try {
             $request = Request::createFromGlobals();
 
-            $request = $this->dependencyManager->get('routing_matcher')->matchRequest($request);
+            $request = $this->dependencyManager->get('routingMatcher')->matchRequest($request);
 
-            $controllerMatcher = new ControllerMatcher();
-            $controllerMatch = $controllerMatcher->matchRoute($this, $request);
+            $controllerMatcher = $this->dependencyManager->get('controllerMatcher');
+            $controllerMatch = $controllerMatcher->matchRoute($request);
 
             $controllerExecutor = new ControllerExecutor();
 
             return $controllerExecutor->executeCallable($controllerMatch->getControllerCallable(), $controllerMatch->getArguments());
         } catch (\Exception $e) {
-            return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->handleException($e);
         }
     }
 
@@ -69,18 +69,33 @@ class Application
      */
     protected function initDependencyManager()
     {
-        $this->dependencyManager = new DependencyManager();
+        $dependencyManager = new DependencyManager();
 
-        $this->dependencyManager->addService('routing', function() {
+        $dependencyManager->addService('dependencyManager', function() use ($dependencyManager) {
+            return $dependencyManager;
+        });
+
+        $dependencyManager->addService('routing', function() {
             return new RoutingDefinition();
         });
 
-        $this->dependencyManager->addService('routing_matcher', function ($routing) {
+        $dependencyManager->addService('routingMatcher', function ($routing) {
             return new RoutingMatcher($routing);
         });
 
-        $this->dependencyManager->addService('application', function () {
+        $dependencyManager->addService('application', function () {
             return $this;
         });
+
+        $dependencyManager->addService('controllerMatcher', function ($dependencyManager) {
+            return new ControllerMatcher($dependencyManager);
+        });
+
+        $this->dependencyManager = $dependencyManager;
+    }
+
+    protected function handleException(\Exception $e)
+    {
+        return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }

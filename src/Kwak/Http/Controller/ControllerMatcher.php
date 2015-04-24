@@ -4,6 +4,7 @@ namespace Kwak\Http\Controller;
 
 use Kwak\Application;
 use Kwak\Framework\Controller\BaseController;
+use Imbrix\DependencyManager;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -13,14 +14,21 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ControllerMatcher
 {
+    /** @var DependencyManager */
+    protected $dependencyManager;
+
+    public function __construct(DependencyManager $dependencyManager)
+    {
+        $this->dependencyManager = $dependencyManager;
+    }
+
     /**
-     * @param Application $application
-     * @param Request     $request
+     * @param Request $request
      *
      * @return ControllerMatch
      * @throws \Exception
      */
-    public function matchRoute(Application $application, Request $request)
+    public function matchRoute(Request $request)
     {
         if (strpos(':', $request->attributes->get('route')->getExecution()) !== false) {
             throw new \Exception(sprintf('The route %s has an invalid execution format', $request->attributes->get('route')->getName()));
@@ -45,12 +53,13 @@ class ControllerMatcher
         $this->matchMethod($controller, $method);
 
         $controllerMatch = new ControllerMatch();
+        $dependencyManager = $this->dependencyManager;
 
-        $controllerMatch->setControllerCallable(function($arguments) use ($application, $controller, $method) {
+        $controllerMatch->setControllerCallable(function($arguments) use ($dependencyManager, $controller, $method) {
             /** @var BaseController $controller */
             $controller = new $controller();
 
-            $controller->setDependencyManager($application->getDependencyManager());
+            $controller->setDependencyManager($dependencyManager);
 
             return call_user_func_array([$controller, $method], $arguments);
         });
