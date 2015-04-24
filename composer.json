@@ -5,6 +5,7 @@
         "symfony/http-foundation": "~3.0@dev",
         "symfony/finder": "~3.0@dev",
         "symfony/filesystem": "~3.0@dev",
+        "symfony/http-kernel": "~3.0@dev",
         "babacooll/imbrix": "0.0.2.*@dev"
     },
     "require-dev": {
