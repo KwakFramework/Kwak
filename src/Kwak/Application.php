@@ -25,11 +25,11 @@ class Application
     {
         $this->initDependencyManager();
 
-        $this->getDependencyManager()->get('requestPool')->addRequest(Request::createFromGlobals());
+        $this->initRequest();
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Exception
      */
     public function run()
@@ -77,16 +77,16 @@ class Application
             return $dependencyManager;
         });
 
-        $dependencyManager->addService('routing', function() {
+        $dependencyManager->addService('application', function () {
+            return $this;
+        });
+
+        $dependencyManager->addService('routingDefinition', function() {
             return new RoutingDefinition();
         });
 
-        $dependencyManager->addService('routingMatcher', function ($routing) {
-            return new RoutingMatcher($routing);
-        });
-
-        $dependencyManager->addService('application', function () {
-            return $this;
+        $dependencyManager->addService('routingMatcher', function ($routingDefinition) {
+            return new RoutingMatcher($routingDefinition);
         });
 
         $dependencyManager->addService('controllerMatcher', function ($dependencyManager) {
@@ -100,6 +100,19 @@ class Application
         $this->dependencyManager = $dependencyManager;
     }
 
+    /**
+     * Adds the current Request to the RequestPool
+     */
+    protected function initRequest()
+    {
+        $this->dependencyManager->get('requestPool')->add(Request::createFromGlobals());
+    }
+
+    /**
+     * @param \Exception $e
+     *
+     * @return Response
+     */
     protected function handleException(\Exception $e)
     {
         return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
