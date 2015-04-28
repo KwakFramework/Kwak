@@ -33,6 +33,10 @@ class RoutingMatcher
         $pathInfo = $request->getPathInfo();
 
         foreach ($this->routingDefinition->getRoutes() as $route) {
+            if ($route->getMethod() && $request->getMethod() != $route->getMethod()) {
+                continue;
+            }
+
             $routePath = $this->convertPathToRegex($route->getPath());
 
             if (preg_match($routePath, $pathInfo, $routeArgs)) {

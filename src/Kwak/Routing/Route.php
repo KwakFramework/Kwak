@@ -18,16 +18,21 @@ class Route
     /** @var string */
     protected $execution;
 
+    /** @var string */
+    protected $method;
+
     /**
      * @param string $name
      * @param string $path
      * @param string $execution
+     * @param string $method
      */
-    public function __construct($name, $path, $execution)
+    public function __construct($name, $path, $execution, $method = null)
     {
         $this->name      = $name;
         $this->path      = $path;
         $this->execution = $execution;
+        $this->method    = $method;
     }
 
     /**
@@ -86,6 +91,26 @@ class Route
     public function setExecution($execution)
     {
         $this->execution = $execution;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @param string $method
+     *
+     * @return Route
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
 
         return $this;
     }

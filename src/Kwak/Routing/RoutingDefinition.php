@@ -2,6 +2,8 @@
 
 namespace Kwak\Routing;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class RoutingDefinition
  *
@@ -17,7 +19,46 @@ class RoutingDefinition
      * @param string $routePath
      * @param string $routeExecution
      */
-    public function addRoute($routeName, $routePath, $routeExecution)
+    public function addPost($routeName, $routePath, $routeExecution)
+    {
+        $this->routes[] = new Route($routeName, $routePath, $routeExecution, Request::METHOD_POST);
+    }
+
+    /**
+     * @param string $routeName
+     * @param string $routePath
+     * @param string $routeExecution
+     */
+    public function addGet($routeName, $routePath, $routeExecution)
+    {
+        $this->routes[] = new Route($routeName, $routePath, $routeExecution, Request::METHOD_GET);
+    }
+
+    /**
+     * @param string $routeName
+     * @param string $routePath
+     * @param string $routeExecution
+     */
+    public function addDelete($routeName, $routePath, $routeExecution)
+    {
+        $this->routes[] = new Route($routeName, $routePath, $routeExecution, Request::METHOD_DELETE);
+    }
+
+    /**
+     * @param string $routeName
+     * @param string $routePath
+     * @param string $routeExecution
+     */
+    public function addPut($routeName, $routePath, $routeExecution)
+    {
+        $this->routes[] = new Route($routeName, $routePath, $routeExecution, Request::METHOD_PUT);
+    }
+    /**
+     * @param string $routeName
+     * @param string $routePath
+     * @param string $routeExecution
+     */
+    public function add($routeName, $routePath, $routeExecution)
     {
         $this->routes[] = new Route($routeName, $routePath, $routeExecution);
     }
